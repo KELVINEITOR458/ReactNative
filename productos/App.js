@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, Alert, Button, TextInput, StyleSheet, Text, View, FlatList } from 'react-native';
+import { Modal, TouchableHighlight, ScrollView, Alert, Button, TextInput, StyleSheet, Text, View, FlatList } from 'react-native';
 import { useState, useEffect } from 'react';
 
 let esNuevo = true;
@@ -19,6 +19,8 @@ export default function App() {
   const [txtPrecioCompra, setPrecioCompra] = useState();
   const [precioVenta, setPrecioVenta] = useState();
   const [numElementos, setNumElementos] = useState(productos.length);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
   useEffect(() => {
     if (txtPrecioCompra) {
@@ -29,49 +31,46 @@ export default function App() {
       }
     }
   }, [txtPrecioCompra]);
-  let ItemProducto = (props) => {
+  let ItemProducto = ({indice, producto}) => {
     return <View style={styles.listaProductos}>
       <View style={styles.itemIndice}>
         <Text>
-          {props.producto.id}
+          {producto.id}
         </Text>
       </View>
       <View style={styles.itemContenido}>
         <Text style={styles.nombreProductos}>
-          {props.producto.nombre}
+          {producto.nombre}
         </Text>
         <Text style={styles.categoriaProductos}>
-          ({props.producto.categoria})
+          ({producto.categoria})
         </Text>
       </View>
       <View style={styles.precioProductos}>
         <Text>
-          {props.producto.precioVenta}
+          {producto.precioVenta}
         </Text>
       </View>
       <View style={styles.botonesProductos}>
-        <Button
-          title=' E '
-          color='green'
-          onPress={()=>{
-            setNombre(props.producto.nombre);
-            setCategoria(props.producto.categoria);
-            setCodigo(props.producto.id.toString());
-            setPrecioCompra(props.producto.precioCompra.toString());
-            setPrecioVenta(props.producto.precioVenta.toString());
+        <TouchableHighlight onPress={()=>{
+            setNombre(producto.nombre);
+            setCategoria(producto.categoria);
+            setCodigo(producto.id.toString());
+            setPrecioCompra(producto.precioCompra.toString());
+            setPrecioVenta(producto.precioVenta.toString());
             esNuevo = false;
-            idSeleccionado = props.producto.id
-          }}
-        />
+            idSeleccionado = producto.id
+          }}>
+          <Text style={styles.editarBoton}> E </Text> 
+        </TouchableHighlight>
         <Button
-          title=' X '
-          color='red'
-          onPress={() => {
-            idSeleccionado=props.indice
-            productos.splice(idSeleccionado, 1);
-            setNumElementos(productos.length)
-          }}
-        />
+            title=' X '
+            color='red'
+            onPress={() => {
+              setProductoSeleccionado({ indice, producto });
+              setModalVisible(true);
+            }}
+          />
       </View>
     </View>
   }
@@ -91,6 +90,12 @@ export default function App() {
     setPrecioVenta(null);
     esNuevo = true;
   }
+  const eliminarProducto = () => {
+    const { indice } = productoSeleccionado;
+    productos.splice(indice, 1);
+    setNumElementos(productos.length);
+    setModalVisible(false);
+  };
   let guardarProducto = () => {
     if(txtCodigo, txtNombre, categoria, txtPrecioCompra, precioVenta ==null){
       Alert.alert("ALERTA", "Debe llenar todos los campos")
@@ -125,7 +130,21 @@ export default function App() {
   
   return (
     <View style={styles.container}>
-
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.modalView}>
+          <Text style={styles.textoModal}>¿Está seguro que quiere eliminar?</Text>
+          <View style={styles.botonesModal}>
+            <Button title="Cancelar" onPress={() => setModalVisible(false)} />
+            <Button title="Aceptar" onPress={eliminarProducto} />
+          </View>
+        </View>
+      </Modal>
       <View style={styles.areaCabecera}>
         <ScrollView>
           <Text style={styles.titulo}>Productos</Text>
@@ -174,15 +193,15 @@ export default function App() {
       <View style={styles.areaContenido}>
         <FlatList style={styles.lista}
           data={productos}
-          renderItem={(elemento) => {
+          renderItem={({item, index}) => {
             return <ItemProducto
-              producto={elemento.item}
-              indice = {elemento.index}
+              producto={item}
+              indice = {index}
             />
           }}
-          keyExtractor={(item) => {
-            return item.id
-          }}
+          keyExtractor={item => 
+             item.id
+          }
         />
       </View>
       <View style={styles.areaPie}>
@@ -278,4 +297,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 5
   },
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+  textoModal: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    backgroundColor: '#88F783',
+    padding: 20,
+    borderRadius: 10,
+    borderWidth: 2
+  },
+  botonesModal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    padding: 20
+  },
+  editarBoton:{
+    backgroundColor: 'green',
+    padding: 8,
+    borderRadius: 5
+  }
 });

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Alert, Button, TextInput, StyleSheet, Text, View, FlatList } from 'react-native';
+import { TouchableHighlight, Alert, Button, TextInput, StyleSheet, Text, View, FlatList } from 'react-native';
 import { useState } from 'react';
 
 let personas = [
@@ -18,38 +18,37 @@ export default function App() {
   const [txtApellido, setTxtApellido] = useState();
   const [numElementos, setNumElementos] = useState(personas.length);
 
-  let ItemPersona = (props) => {
+  let ItemPersona = ({indice, persona}) => {
     return <View style={styles.itemPersona}>
       <View style={styles.itemIndice}>
         <Text>
-          {props.indice}
+          {indice}
         </Text>
       </View>
       <View style={styles.itemContenido}>
         <Text style={styles.textoPrincipal}>
-          {props.persona.nombre} {props.persona.apellido}
+          {persona.nombre} {persona.apellido}
         </Text>
         <Text style={styles.textoSecundario}>
-          {props.persona.cedula}
+          {persona.cedula}
         </Text>
       </View>
       <View style={styles.itemBotones}>
-        <Button 
-          title=' E '
-          color='green'
-          onPress={()=>{
-            setTxtCedula(props.persona.cedula);
-            setTxtNombre(props.persona.nombre);
-            setTxtApellido(props.persona.apellido);
+        <TouchableHighlight onPress={()=>{
+            setTxtCedula(persona.cedula);
+            setTxtNombre(persona.nombre);
+            setTxtApellido(persona.apellido);
             esNuevo= false;
-            indiceSeleccionado = props.indice
-          }}  
-        />
+            indiceSeleccionado = indice
+          }} >
+         <Text> E </Text>
+        </TouchableHighlight>
+        
         <Button 
           title=' X '
           color='red'
           onPress={()=>{
-            indiceSeleccionado=props.indice;
+            indiceSeleccionado=indice;
             personas.splice(indiceSeleccionado, 1);
             setNumElementos(personas.length)
           }}
@@ -127,16 +126,16 @@ export default function App() {
       <View style={styles.areaContenido}>
         <FlatList style={styles.lista}
           data={personas}
-          renderItem={(elemento) => {
+          renderItem={({index, item}) => {
             return <ItemPersona
-              indice={elemento.index}
-              persona={elemento.item}
+              indice={index}
+              persona={item}
             />
           }}
           //retorna un item que no se repita
-          keyExtractor={(item) => {
-            return item.cedula
-          }}
+          keyExtractor={item => 
+             item.cedula
+          }
         />
       </View>
       <View style={styles.areaPie}>
