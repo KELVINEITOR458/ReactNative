@@ -3,10 +3,15 @@ import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { GradeForm } from './app/screens/GradeForm';
-import { ListGrades } from './app/screens/ListGrades'
+import { ListGrades } from './app/screens/ListGrades';
+import 'react-native-gesture-handler';
+import {createDrawerNavigator} from '@react-navigation/drawer'
+
+const StackGrades = createNativeStackNavigator();
+
 
 export default function App() {
-  const StackGrades = createNativeStackNavigator();
+  
 
   return (
     <NavigationContainer>
